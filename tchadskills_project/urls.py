@@ -1,14 +1,14 @@
-from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-from core.views import home
+from rest_framework.routers import DefaultRouter
+from core.api_views import CourseViewSet, CategoryViewSet
+
+# Create a router and register the viewsets
+router = DefaultRouter()
+router.register(r'courses', CourseViewSet)
+router.register(r'categories', CategoryViewSet)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', home, name='home'),
+    path('api/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls')),  # for authentication
+    # Include any existing home view and static file serving here
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
