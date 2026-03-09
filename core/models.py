@@ -76,3 +76,31 @@ class Lesson(models.Model):
 
     def __str__(self):
         return self.title
+
+class Enrollment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
+    enrolled_at = models.DateTimeField(auto_now_add=True)
+    progress = models.IntegerField(default=0)  # Pourcentage de progression
+
+    class Meta:
+        unique_together = ('user', 'course')
+
+    def __str__(self):
+        return f"{self.user.username} inscrit à {self.course.title}"
+
+class Payment(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'En attente'),
+        ('completed', 'Terminé'),
+        ('failed', 'Échoué'),
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_id = models.CharField(max_length=100, unique=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Paiement {self.transaction_id} - {self.status}"
