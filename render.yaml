@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: tchadskills
+    env: python
+    buildCommand: "./setup.sh"
+    startCommand: "gunicorn tchadskills_project.wsgi:application --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: tchadskills_project.settings
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*"
+    plan: free
