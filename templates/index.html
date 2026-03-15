@@ -943,14 +943,15 @@
             <div class="modal-body">
                 <form onsubmit="handleLogin(event)">
                     <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-input" required placeholder="votre@email.com">
+                        <label class="form-label">Nom d'utilisateur</label>
+                        <input type="text" id="loginUsername" class="form-input" required placeholder="Ex: admin">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Mot de passe</label>
-                        <input type="password" class="form-input" required placeholder="••••••••">
+                        <input type="password" id="loginPassword" class="form-input" required placeholder="••••••••">
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Se connecter</button>
+                    <div id="loginError" style="color:#e53e3e; font-size:0.875rem; margin-bottom:0.5rem; display:none;"></div>
+                    <button type="submit" id="loginBtn" class="btn btn-primary" style="width: 100%;">Se connecter</button>
                     <p style="text-align: center; margin-top: 1rem; color: var(--gray);">
                         Pas encore de compte? 
                         <a href="#" onclick="closeModal('loginModal'); showModal('registerModal')" style="color: var(--primary);">S'inscrire</a>
@@ -971,28 +972,33 @@
                 <form onsubmit="handleRegister(event)">
                     <div class="form-group">
                         <label class="form-label">Type de compte</label>
-                        <select class="form-select" required>
+                        <select id="registerType" class="form-select" required>
                             <option value="student">Apprenant</option>
                             <option value="instructor">Formateur</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Nom complet</label>
-                        <input type="text" class="form-input" required placeholder="Votre nom">
+                        <label class="form-label">Nom d'utilisateur</label>
+                        <input type="text" id="registerUsername" class="form-input" required placeholder="Ex: mahadi123">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Prénom et Nom</label>
+                        <input type="text" id="registerFullName" class="form-input" required placeholder="Votre nom complet">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input type="email" class="form-input" required placeholder="votre@email.com">
+                        <input type="email" id="registerEmail" class="form-input" required placeholder="votre@email.com">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Téléphone</label>
-                        <input type="tel" class="form-input" required placeholder="+235 XX XX XX XX">
+                        <input type="tel" id="registerPhone" class="form-input" placeholder="+235 XX XX XX XX">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Mot de passe</label>
-                        <input type="password" class="form-input" required placeholder="••••••••">
+                        <input type="password" id="registerPassword" class="form-input" required placeholder="••••••••">
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">S'inscrire</button>
+                    <div id="registerError" style="color:#e53e3e; font-size:0.875rem; margin-bottom:0.5rem; display:none;"></div>
+                    <button type="submit" id="registerBtn" class="btn btn-primary" style="width: 100%;">S'inscrire</button>
                 </form>
             </div>
         </div>
@@ -1133,8 +1139,8 @@
             <div class="footer-section">
                 <h3>Contact</h3>
                 <ul class="footer-links">
-                    <li><i class="fas fa-envelope"></i> mahadimoussa@gmail.com</li>
-                    <li><i class="fas fa-phone"></i> +235 69 64 37 97</li>
+                    <li><i class="fas fa-envelope"></i> contact@tchadskills.td</li>
+                    <li><i class="fas fa-phone"></i> +235 XX XX XX XX</li>
                     <li><i class="fas fa-map-marker-alt"></i> N'Djamena, Tchad</li>
                 </ul>
             </div>
@@ -1540,18 +1546,145 @@
             document.getElementById(modalId).classList.remove('active');
         }
 
-        // Form Handlers
-        function handleLogin(e) {
+        // ============================================================
+        // AUTHENTIFICATION RÉELLE — connectée à l'API Django/JWT
+        // ============================================================
+
+        // Stockage du token et de l'utilisateur courant
+        let authToken = localStorage.getItem('tchadskills_token') || null;
+        let currentUser = JSON.parse(localStorage.getItem('tchadskills_user') || 'null');
+
+        // Met à jour la navbar selon l'état de connexion
+        function updateNavbar() {
+            const loginBtn = document.querySelector('[onclick="showModal('loginModal')"]');
+            if (loginBtn && currentUser) {
+                loginBtn.textContent = currentUser.username;
+                loginBtn.onclick = () => handleLogout();
+            }
+        }
+        updateNavbar();
+
+        // Connexion via POST /api/token/
+        async function handleLogin(e) {
             e.preventDefault();
-            showNotification('Connexion réussie!', 'success');
-            closeModal('loginModal');
-            showPage('dashboard');
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('loginBtn');
+            const errorDiv = document.getElementById('loginError');
+
+            errorDiv.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Connexion en cours...';
+
+            try {
+                const response = await fetch('/api/token/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Stocker le token JWT
+                    authToken = data.access;
+                    localStorage.setItem('tchadskills_token', data.access);
+                    localStorage.setItem('tchadskills_refresh', data.refresh);
+
+                    // Récupérer les infos de l'utilisateur
+                    const userResp = await fetch('/api/users/', {
+                        headers: { 'Authorization': 'Bearer ' + data.access }
+                    });
+                    // Chercher l'utilisateur par username dans la liste
+                    if (userResp.ok) {
+                        const users = await userResp.json();
+                        const user = (users.results || users).find(u => u.username === username);
+                        if (user) {
+                            currentUser = user;
+                            localStorage.setItem('tchadskills_user', JSON.stringify(user));
+                        }
+                    }
+
+                    showNotification('Connexion réussie ! Bienvenue ' + username, 'success');
+                    closeModal('loginModal');
+                    updateNavbar();
+                    showPage('dashboard');
+                } else {
+                    // Afficher le message d'erreur exact du serveur
+                    const msg = data.detail || data.non_field_errors?.[0] || 'Identifiants incorrects.';
+                    errorDiv.textContent = '❌ ' + msg;
+                    errorDiv.style.display = 'block';
+                }
+            } catch (err) {
+                errorDiv.textContent = '❌ Impossible de contacter le serveur. Vérifiez votre connexion.';
+                errorDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Se connecter';
+            }
         }
 
-        function handleRegister(e) {
+        // Déconnexion
+        function handleLogout() {
+            authToken = null;
+            currentUser = null;
+            localStorage.removeItem('tchadskills_token');
+            localStorage.removeItem('tchadskills_refresh');
+            localStorage.removeItem('tchadskills_user');
+            showNotification('Déconnexion réussie.', 'success');
+            showPage('home');
+            updateNavbar();
+        }
+
+        // Inscription via POST /api/users/
+        async function handleRegister(e) {
             e.preventDefault();
-            showNotification('Inscription réussie! Vérifiez votre email.', 'success');
-            closeModal('registerModal');
+            const username = document.getElementById('registerUsername').value.trim();
+            const fullName = document.getElementById('registerFullName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const phone = document.getElementById('registerPhone').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const user_type = document.getElementById('registerType').value;
+            const btn = document.getElementById('registerBtn');
+            const errorDiv = document.getElementById('registerError');
+
+            const nameParts = fullName.split(' ');
+            const first_name = nameParts[0] || '';
+            const last_name = nameParts.slice(1).join(' ') || '';
+
+            errorDiv.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Inscription en cours...';
+
+            try {
+                const response = await fetch('/api/users/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, first_name, last_name, phone, user_type, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok || response.status === 201) {
+                    showNotification('Inscription réussie ! Connectez-vous.', 'success');
+                    closeModal('registerModal');
+                    // Pré-remplir le champ username dans le formulaire de login
+                    setTimeout(() => {
+                        showModal('loginModal');
+                        document.getElementById('loginUsername').value = username;
+                    }, 500);
+                } else {
+                    const msgs = Object.entries(data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v[0] : v}`).join(' | ');
+                    errorDiv.textContent = '❌ ' + msgs;
+                    errorDiv.style.display = 'block';
+                }
+            } catch (err) {
+                errorDiv.textContent = '❌ Impossible de contacter le serveur.';
+                errorDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "S'inscrire";
+            }
         }
 
         function handleCreateCourse(e) {
@@ -1615,6 +1748,6 @@
             }
         }
     </script>
-<script src="{% static 'api_integration.js' %}"></script>
+<!-- api_integration.js intégré directement dans ce fichier -->
 </body>
 </html>
