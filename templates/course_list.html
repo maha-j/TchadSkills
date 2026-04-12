@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Tous les cours | TchadSkills{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center mb-5">
+            <div class="col-md-6">
+                <h1 class="fw-bold">Explorez nos formations</h1>
+                <p class="text-muted">Découvrez les compétences qui feront décoller votre carrière au Tchad.</p>
+            </div>
+            <div class="col-md-6">
+                <form method="GET" action="{% url 'course_list' %}" class="d-flex gap-2">
+                    <input type="text" name="q" value="{{ query|default:'' }}" class="form-control" placeholder="Rechercher un cours...">
+                    <button type="submit" class="btn btn-primary">Rechercher</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Filtres -->
+            <div class="col-lg-3 mb-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <h5 class="fw-bold mb-3">Catégories</h5>
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'course_list' %}" class="list-group-item list-group-item-action {% if not current_category %}active{% endif %}">
+                            Toutes les catégories
+                        </a>
+                        {% for cat in categories %}
+                        <a href="?category={{ cat.slug }}" class="list-group-item list-group-item-action {% if current_category == cat.slug %}active{% endif %}">
+                            {{ cat.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des cours -->
+            <div class="col-lg-9">
+                <div class="row g-4">
+                    {% for course in courses %}
+                    <div class="col-md-6 col-xl-4">
+                        <div class="course-card">
+                            <div class="course-badge">{{ course.get_level_display }}</div>
+                            <img src="{{ course.thumbnail.url|default:'https://via.placeholder.com/400x250?text=TchadSkills' }}" alt="{{ course.title }}">
+                            <div class="course-card-body">
+                                <span class="text-primary fw-bold small">{{ course.category.name }}</span>
+                                <h5 class="fw-bold mt-1">{{ course.title }}</h5>
+                                <p class="text-muted small">{{ course.short_description|truncatechars:80 }}</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="fw-bold text-dark">{% if course.price > 0 %}{{ course.price }} FCFA{% else %}Gratuit{% endif %}</span>
+                                    <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-outline-primary">Voir plus</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h3>Aucun cours trouvé</h3>
+                        <p>Essayez de modifier vos critères de recherche.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

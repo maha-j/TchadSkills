@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}TchadSkills - Apprendre pour Demain{% endblock %}
+
+{% block extra_css %}
+    .hero { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 6rem 2rem; text-align: center; border-radius: 0 0 50px 50px; }
+    .hero h1 { font-size: 3.5rem; margin-bottom: 1.5rem; font-weight: 800; }
+    .hero p { font-size: 1.4rem; margin-bottom: 3rem; opacity: 0.9; max-width: 800px; margin-left: auto; margin-right: auto; }
+    
+    .search-box { max-width: 700px; margin: 0 auto; display: flex; gap: 1rem; background: white; padding: 0.5rem; border-radius: 12px; box-shadow: var(--shadow); }
+    .search-box input { flex: 1; border: none; padding: 1rem; font-size: 1.1rem; outline: none; }
+    .search-box button { padding: 0 2rem; border-radius: 8px; background: var(--secondary); color: var(--dark); border: none; font-weight: 700; cursor: pointer; transition: 0.3s; }
+    .search-box button:hover { background: #e6a600; }
+
+    .stats { display: flex; justify-content: center; gap: 4rem; margin-top: 4rem; flex-wrap: wrap; }
+    .stat-item { text-align: center; }
+    .stat-number { font-size: 2.5rem; font-weight: 800; display: block; }
+    .stat-label { font-size: 1rem; opacity: 0.8; }
+
+    .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2.5rem; margin-top: 3rem; }
+    .course-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow); transition: 0.3s; border: 1px solid var(--border); }
+    .course-card:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+    .course-img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
+    .course-body { padding: 1.5rem; }
+    .course-cat { color: var(--primary); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; display: block; }
+    .course-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; color: var(--dark); text-decoration: none; display: block; }
+    .course-meta { display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .course-price { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+    .course-instructor { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--gray); }
+    .course-instructor img { width: 30px; height: 30px; border-radius: 50%; }
+
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; margin-top: 4rem; }
+    .section-title { font-size: 2.2rem; font-weight: 800; color: var(--dark); }
+{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        <div class="container">
+            <h1>Apprenez les compétences de demain au Tchad</h1>
+            <p>Accédez à des cours de haute qualité en informatique, entrepreneuriat et marketing, conçus par les meilleurs experts locaux et internationaux.</p>
+            
+            <form action="/courses/" method="GET" class="search-box">
+                <input type="text" name="q" placeholder="Que voulez-vous apprendre aujourd'hui ?">
+                <button type="submit">Rechercher</button>
+            </form>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number">50+</span>
+                    <span class="stat-label">Cours Vidéos</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">2000+</span>
+                    <span class="stat-label">Étudiants</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">15+</span>
+                    <span class="stat-label">Instructeurs</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Cours les plus populaires</h2>
+            <a href="/courses/" class="btn btn-outline">Voir tout</a>
+        </div>
+
+        <div class="course-grid">
+            {% for course in courses %}
+            <div class="course-card">
+                <img src="{{ course.thumbnail.url|default:'https://via.placeholder.com/400x225?text=TchadSkills' }}" class="course-img" alt="{{ course.title }}">
+                <div class="course-body">
+                    <span class="course-cat">{{ course.category.name }}</span>
+                    <a href="/course/{{ course.slug }}/" class="course-title">{{ course.title }}</a>
+                    <div class="course-instructor">
+                        <img src="{{ course.instructor.avatar.url|default:'https://via.placeholder.com/30' }}" alt="{{ course.instructor.get_full_name }}">
+                        <span>{{ course.instructor.get_full_name|default:course.instructor.username }}</span>
+                    </div>
+                    <div class="course-meta">
+                        <div class="course-price">{{ course.price|floatformat:0 }} FCFA</div>
+                        <div style="color: var(--warning)"><i class="fas fa-star"></i> 4.8</div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>Aucun cours disponible pour le moment.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TchadSkills - Apprendre pour Demain{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0066CC;
+            --primary-dark: #004C99;
+            --secondary: #FFB800;
+            --success: #28A745;
+            --danger: #DC3545;
+            --warning: #FFC107;
+            --dark: #1A1A2E;
+            --light: #F8F9FA;
+            --gray: #6C757D;
+            --border: #DEE2E6;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; line-height: 1.6; color: var(--dark); background: var(--light); }
+        
+        .navbar { background: white; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 1000; padding: 1rem 2rem; }
+        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+        
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-link { text-decoration: none; color: var(--dark); font-weight: 500; transition: 0.3s; }
+        .nav-link:hover { color: var(--primary); }
+        
+        .btn { padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; text-decoration: none; border: none; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        
+        footer { background: var(--dark); color: white; padding: 4rem 2rem; margin-top: 4rem; }
+        .footer-grid { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; }
+        
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo"><i class="fas fa-graduation-cap"></i> TchadSkills</a>
+            <div class="nav-links">
+                <a href="/courses/" class="nav-link">Cours</a>
+                <a href="/categories/" class="nav-link">Catégories</a>
+                {% if user.is_authenticated %}
+                    <a href="/dashboard/" class="nav-link">Mon Espace</a>
+                    <a href="/logout/" class="btn btn-outline">Déconnexion</a>
+                {% else %}
+                    <a href="/login/" class="nav-link">Connexion</a>
+                    <a href="/register/" class="btn btn-primary">S'inscrire</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-grid">
+            <div>
+                <h3>TchadSkills</h3>
+                <p>La première plateforme d'apprentissage en ligne dédiée aux talents du Tchad.</p>
+            </div>
+            <div>
+                <h4>Liens Rapides</h4>
+                <p><a href="#" style="color: white;">À propos</a></p>
+                <p><a href="#" style="color: white;">Devenir Instructeur</a></p>
+                <p><a href="#" style="color: white;">Aide & Support</a></p>
+            </div>
+            <div>
+                <h4>Contact</h4>
+                <p><i class="fas fa-envelope"></i> contact@tchadskills.td</p>
+                <p><i class="fas fa-phone"></i> +235 66 00 00 00</p>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

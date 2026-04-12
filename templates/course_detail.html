@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} | TchadSkills{% endblock %}
+
+{% block extra_css %}
+    .course-header { background: #1a1a1a; color: white; padding: 4rem 0; margin-top: -20px; }
+    .course-card-fixed { position: sticky; top: 100px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 0; }
+    .module-card { border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 1rem; }
+    .module-header { padding: 1.2rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; }
+    .lesson-link { padding: 0.8rem 1.2rem; display: flex; align-items: center; gap: 0.8rem; text-decoration: none; color: #444; border-top: 1px solid #eee; transition: 0.2s; }
+    .lesson-link:hover { background: #f1f3f5; color: var(--primary); }
+{% endblock %}
+
+{% block content %}
+<div class="course-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-white-50">Accueil</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'course_list' %}" class="text-white-50">Cours</a></li>
+                        <li class="breadcrumb-item active text-white" aria-current="page">{{ course.category.name }}</li>
+                    </ol>
+                </nav>
+                <h1 class="display-5 fw-bold mb-3">{{ course.title }}</h1>
+                <p class="lead text-white-50 mb-4">{{ course.short_description }}</p>
+                <div class="d-flex align-items-center gap-4 text-white-50">
+                    <span><i class="fas fa-signal me-2"></i>{{ course.get_level_display }}</span>
+                    <span><i class="fas fa-user-tie me-2"></i>{{ course.instructor.get_full_name }}</span>
+                    <span><i class="fas fa-calendar-alt me-2"></i>Mis à jour le {{ course.updated_at|date:"d M Y" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row">
+        <!-- Contenu principal -->
+        <div class="col-lg-8">
+            <div class="mb-5">
+                <h3 class="fw-bold mb-4">Description du cours</h3>
+                <div class="course-description fs-5 text-muted">
+                    {{ course.description|linebreaks }}
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <h3 class="fw-bold mb-4">Programme de la formation</h3>
+                <div class="curriculum">
+                    {% for module in modules %}
+                    <div class="module-card">
+                        <div class="module-header" data-bs-toggle="collapse" data-bs-target="#module-{{ module.id }}">
+                            <h5 class="mb-0 fw-bold">{{ module.title }}</h5>
+                            <span class="text-muted">{{ module.lessons.count }} leçons</span>
+                        </div>
+                        <div id="module-{{ module.id }}" class="collapse show">
+                            {% for lesson in module.lessons.all %}
+                            <div class="lesson-link">
+                                <i class="fas fa-play-circle text-muted"></i>
+                                <span>{{ lesson.title }}</span>
+                                <span class="ms-auto text-muted small">{{ lesson.duration_minutes }} min</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte d'achat/inscription -->
+        <div class="col-lg-4">
+            <div class="card course-card-fixed">
+                <div class="position-relative">
+                    <img src="{{ course.thumbnail.url|default:'https://via.placeholder.com/400x250?text=TchadSkills' }}" class="card-img-top" alt="{{ course.title }}">
+                    {% if course.preview_video_url %}
+                    <div class="position-absolute top-50 left-50 translate-middle">
+                        <a href="{{ course.preview_video_url }}" class="btn btn-light rounded-circle p-3 shadow-lg"><i class="fas fa-play fa-lg"></i></a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <span class="display-5 fw-bold">{% if course.price > 0 %}{{ course.price }} FCFA{% else %}Gratuit{% endif %}</span>
+                    </div>
+                    
+                    {% if is_enrolled %}
+                        <a href="{% url 'course_viewer' course.slug %}" class="btn btn-primary btn-lg w-100 mb-3">Continuer l'apprentissage</a>
+                    {% else %}
+                        <a href="{% url 'enroll_course' course.slug %}" class="btn btn-primary btn-lg w-100 mb-3">S'inscrire maintenant</a>
+                        <p class="text-center text-muted small">Accès à vie • Certificat inclus</p>
+                    {% endif %}
+                    
+                    <hr>
+                    <h6 class="fw-bold mb-3">Ce cours comprend :</h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li class="mb-2"><i class="fas fa-video me-2"></i>Vidéos HD à la demande</li>
+                        <li class="mb-2"><i class="fas fa-file-download me-2"></i>Ressources téléchargeables</li>
+                        <li class="mb-2"><i class="fas fa-mobile-alt me-2"></i>Accès sur mobile et TV</li>
+                        <li class="mb-2"><i class="fas fa-certificate me-2"></i>Certificat de fin de formation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

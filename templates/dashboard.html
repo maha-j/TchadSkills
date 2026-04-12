@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Mon Tableau de Bord | TchadSkills{% endblock %}
+
+{% block extra_css %}
+    .dashboard-header { background: #f8f9fa; padding: 3rem 0; border-bottom: 1px solid #eee; }
+    .course-progress-card { border-radius: 12px; border: 1px solid #e0e0e0; overflow: hidden; transition: 0.3s; height: 100%; }
+    .course-progress-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+    .progress-bar-container { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin: 1rem 0; }
+    .progress-bar-fill { height: 100%; background: var(--primary); transition: 0.5s; }
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="fw-bold mb-1">Bonjour, {{ user.get_full_name }} !</h1>
+                <p class="text-muted">Ravi de vous revoir. Prêt pour une nouvelle leçon ?</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'course_list' %}" class="btn btn-primary">Découvrir d'autres cours</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Statistiques -->
+        <div class="col-md-4 col-lg-3">
+            <div class="card border-0 shadow-sm p-4 text-center mb-4">
+                <div class="display-6 fw-bold text-primary">{{ enrollments.count }}</div>
+                <div class="text-muted small">Cours suivis</div>
+            </div>
+            <div class="card border-0 shadow-sm p-4 text-center">
+                <div class="display-6 fw-bold text-success">{{ user.completed_courses_count }}</div>
+                <div class="text-muted small">Cours terminés</div>
+            </div>
+        </div>
+
+        <!-- Liste des cours en cours -->
+        <div class="col-md-8 col-lg-9">
+            <h3 class="fw-bold mb-4">Mes formations en cours</h3>
+            <div class="row g-4">
+                {% for enrollment in enrollments %}
+                <div class="col-md-6 col-xl-4">
+                    <div class="course-progress-card card">
+                        <img src="{{ enrollment.course.thumbnail.url|default:'https://via.placeholder.com/400x250?text=TchadSkills' }}" class="card-img-top" alt="{{ enrollment.course.title }}">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-2">{{ enrollment.course.title }}</h5>
+                            <p class="text-muted small mb-3">Par {{ enrollment.course.instructor.get_full_name }}</p>
+                            
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: 35%"></div> <!-- Exemple statique pour le moment -->
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small">35% complété</span>
+                                <a href="{% url 'course_viewer' enrollment.course.slug %}" class="btn btn-sm btn-primary">Continuer</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <div class="card border-0 shadow-sm p-5">
+                        <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
+                        <h4>Vous n'êtes inscrit à aucun cours</h4>
+                        <p class="text-muted">Commencez dès maintenant à apprendre de nouvelles compétences.</p>
+                        <a href="{% url 'course_list' %}" class="btn btn-primary mt-3">Parcourir le catalogue</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
