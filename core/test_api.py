@@ -57,3 +57,19 @@ class CoreAPITest(APITestCase):
         me_resp = auth_client.get('/api/me/')
         self.assertEqual(me_resp.status_code, 200)
         self.assertEqual(me_resp.json()['username'], 'apiuser')
+
+    def test_me_patch_updates_profile(self):
+        resp = self.client.post('/api/login/', {'username': 'apiuser', 'password': 'secret123'})
+        self.assertEqual(resp.status_code, 200)
+        access_token = resp.json()['access']
+        auth_client = APIClient()
+        auth_client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
+
+        patch_resp = auth_client.patch('/api/me/', {'first_name': 'API', 'last_name': 'User'})
+        self.assertEqual(patch_resp.status_code, 200)
+        self.assertEqual(patch_resp.json()['first_name'], 'API')
+        self.assertEqual(patch_resp.json()['last_name'], 'User')
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.first_name, 'API')
+        self.assertEqual(self.user.last_name, 'User')
