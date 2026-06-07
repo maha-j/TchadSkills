@@ -60,6 +60,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tchadskills_project.wsgi.application'
 
+# Configuration de la base de données (SQLite par défaut, PostgreSQL si DATABASE_URL est présent)
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -84,6 +85,8 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Configuration WhiteNoise pour les fichiers statiques en production
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = 'media/'
@@ -102,6 +105,7 @@ REST_FRAMEWORK = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+# Sécurité en production
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True

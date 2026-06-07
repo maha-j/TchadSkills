@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.venv/
+venv/
+ENV/
+.env
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+/staticfiles/
+media/
+
+# VS Code
+.vscode/
+
+# Pytest
+.pytest_cache/
+
+# Misc
+*.swp
+*.swo
