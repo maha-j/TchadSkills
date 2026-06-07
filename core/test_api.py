@@ -31,7 +31,18 @@ class CoreAPITest(APITestCase):
         User = get_user_model()
         self.assertTrue(User.objects.filter(username='newuser').exists())
 
+    def test_register_returns_tokens(self):
+        data = {'username': 'newuser2', 'email': 'n2@example.com', 'password': 'newpass123'}
+        resp = self.client.post('/api/register/', data)
+        self.assertEqual(resp.status_code, 201)
+        json_data = resp.json()
+        self.assertIn('access', json_data)
+        self.assertIn('refresh', json_data)
+        User = get_user_model()
+        self.assertTrue(User.objects.filter(username='newuser2').exists())
+
     def test_token_obtain(self):
-        resp = self.client.post('/api/token/', {'username': 'apiuser', 'password': 'secret123'})
+        resp = self.client.post('/api/login/', {'username': 'apiuser', 'password': 'secret123'})
         self.assertEqual(resp.status_code, 200)
         self.assertIn('access', resp.json())
+        self.assertIn('refresh', resp.json())

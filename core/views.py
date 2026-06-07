@@ -1,7 +1,15 @@
 from django.shortcuts import render
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, generics, status
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User, Category, Course, Lesson
-from .serializers import UserSerializer, CategorySerializer, CourseSerializer, LessonSerializer
+from .serializers import (
+    UserSerializer,
+    RegisterSerializer,
+    CategorySerializer,
+    CourseSerializer,
+    LessonSerializer,
+)
 
 
 def home(request):
@@ -17,6 +25,20 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
+
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        user = User.objects.get(pk=response.data['id'])
+        refresh = RefreshToken.for_user(user)
+        response.data['access'] = str(refresh.access_token)
+        response.data['refresh'] = str(refresh)
+        return response
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
