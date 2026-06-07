@@ -105,6 +105,9 @@ REST_FRAMEWORK = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@tchadskills.td')
+
 # Sécurité en production
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True

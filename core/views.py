@@ -1,11 +1,14 @@
+from django.conf import settings
+from django.core.mail import send_mail
 from django.shortcuts import render
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User, Category, Course, Lesson
+from .models import User, Category, Course, Lesson, VerificationCode
 from .serializers import (
     UserSerializer,
     RegisterSerializer,
+    SendVerificationCodeSerializer,
     CategorySerializer,
     CourseSerializer,
     LessonSerializer,
@@ -14,6 +17,18 @@ from .serializers import (
 
 def home(request):
     return render(request, 'index.html')
+
+
+def login_page(request):
+    return render(request, 'login.html')
+
+
+def register_page(request):
+    return render(request, 'register.html')
+
+
+def logout_page(request):
+    return render(request, 'logout.html')
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -39,6 +54,33 @@ class RegisterView(generics.CreateAPIView):
         response.data['access'] = str(refresh.access_token)
         response.data['refresh'] = str(refresh)
         return response
+
+
+class SendVerificationCodeView(generics.GenericAPIView):
+    serializer_class = SendVerificationCodeSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        contact = serializer.validated_data['contact']
+
+        verification = VerificationCode.create_code(contact)
+
+        if '@' in contact:
+            send_mail(
+                subject='Votre code de vérification TchadSkills',
+                message=f'Votre code de vérification est : {verification.code}',
+                from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@tchadskills.td'),
+                recipient_list=[contact],
+                fail_silently=True,
+            )
+        else:
+            # Pour les tests et le développement sans service SMS,
+            # le code est stocké en base. En production, connectez une API SMS ici.
+            print(f"Vérification SMS envoyé à {contact} : {verification.code}")
+
+        return Response({'detail': 'Code de vérification envoyé.'}, status=status.HTTP_200_OK)
 
 
 class MeView(generics.RetrieveUpdateAPIView):

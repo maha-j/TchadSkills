@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 from django.utils.text import slugify
+from datetime import timedelta
+import random
+import string
 
 class User(AbstractUser):
     USER_TYPES = (
@@ -15,6 +19,37 @@ class User(AbstractUser):
 
     class Meta:
         db_table = 'users'
+
+
+class VerificationCode(models.Model):
+    contact = models.CharField(max_length=255)
+    code = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=50, default='registration')
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Code de vérification'
+        verbose_name_plural = 'Codes de vérification'
+
+    def __str__(self):
+        return f"{self.contact} - {self.code} ({'utilisé' if self.is_used else 'actif'})"
+
+    @classmethod
+    def generate_code(cls, length=6):
+        return ''.join(random.choices(string.digits, k=length))
+
+    @classmethod
+    def create_code(cls, contact, purpose='registration', ttl_minutes=10):
+        code = cls.generate_code()
+        expires_at = timezone.now() + timedelta(minutes=ttl_minutes)
+        return cls.objects.create(contact=contact, code=code, purpose=purpose, expires_at=expires_at)
+
+    def is_expired(self):
+        return self.expires_at <= timezone.now()
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100)

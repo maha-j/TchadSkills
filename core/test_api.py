@@ -1,7 +1,7 @@
 from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth import get_user_model
 
-from .models import Category, Course
+from .models import Category, Course, VerificationCode
 
 
 class CoreAPITest(APITestCase):
@@ -32,7 +32,17 @@ class CoreAPITest(APITestCase):
         self.assertTrue(User.objects.filter(username='newuser').exists())
 
     def test_register_returns_tokens(self):
-        data = {'username': 'newuser2', 'email': 'n2@example.com', 'password': 'newpass123'}
+        contact = 'n2@example.com'
+        send_resp = self.client.post('/api/send-code/', {'contact': contact})
+        self.assertEqual(send_resp.status_code, 200)
+
+        code = VerificationCode.objects.filter(contact=contact, is_used=False).first().code
+        data = {
+            'username': 'newuser2',
+            'email': contact,
+            'password': 'newpass123',
+            'verification_code': code,
+        }
         resp = self.client.post('/api/register/', data)
         self.assertEqual(resp.status_code, 201)
         json_data = resp.json()
@@ -57,6 +67,28 @@ class CoreAPITest(APITestCase):
         me_resp = auth_client.get('/api/me/')
         self.assertEqual(me_resp.status_code, 200)
         self.assertEqual(me_resp.json()['username'], 'apiuser')
+
+    def test_send_code_to_contact(self):
+        resp = self.client.post('/api/send-code/', {'contact': 'newuser@example.com'})
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(VerificationCode.objects.filter(contact='newuser@example.com', is_used=False).exists())
+
+    def test_register_with_verification_code(self):
+        contact = 'newuser2@example.com'
+        send_resp = self.client.post('/api/send-code/', {'contact': contact})
+        self.assertEqual(send_resp.status_code, 200)
+
+        code = VerificationCode.objects.filter(contact=contact, is_used=False).first().code
+        data = {
+            'username': 'newuser2',
+            'email': contact,
+            'password': 'newpass123',
+            'verification_code': code,
+        }
+        resp = self.client.post('/api/register/', data)
+        self.assertEqual(resp.status_code, 201)
+        User = get_user_model()
+        self.assertTrue(User.objects.filter(username='newuser2').exists())
 
     def test_me_patch_updates_profile(self):
         resp = self.client.post('/api/login/', {'username': 'apiuser', 'password': 'secret123'})
