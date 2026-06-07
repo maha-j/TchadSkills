@@ -46,3 +46,14 @@ class CoreAPITest(APITestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn('access', resp.json())
         self.assertIn('refresh', resp.json())
+
+    def test_me_authenticated(self):
+        resp = self.client.post('/api/login/', {'username': 'apiuser', 'password': 'secret123'})
+        self.assertEqual(resp.status_code, 200)
+        access_token = resp.json()['access']
+        auth_client = APIClient()
+        auth_client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
+
+        me_resp = auth_client.get('/api/me/')
+        self.assertEqual(me_resp.status_code, 200)
+        self.assertEqual(me_resp.json()['username'], 'apiuser')

@@ -10,6 +10,7 @@ from core.views import (
     CourseViewSet,
     LessonViewSet,
     RegisterView,
+    MeView,
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -25,6 +26,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/register/', RegisterView.as_view(), name='register'),
     path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/me/', MeView.as_view(), name='me'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
