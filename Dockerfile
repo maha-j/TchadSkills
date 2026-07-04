@@ -27,5 +27,5 @@ RUN python manage.py collectstatic --noinput
 # Exposer le port par défaut
 EXPOSE 8000
 
-# Commande de lancement avec Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "tchadskills_project.wsgi:application"]
+# Appliquer les migrations puis lancer Gunicorn
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn --bind 0.0.0.0:8000 tchadskills_project.wsgi:application"]
