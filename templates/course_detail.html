@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ course.title }} | TchadSkills{% endblock %}
 
@@ -20,7 +21,7 @@
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-white-50">Accueil</a></li>
                         <li class="breadcrumb-item"><a href="{% url 'course_list' %}" class="text-white-50">Cours</a></li>
-                        <li class="breadcrumb-item active text-white" aria-current="page">{{ course.category.name }}</li>
+                        <li class="breadcrumb-item active text-white" aria-current="page">{{ course.category.name|default:course.title }}</li>
                     </ol>
                 </nav>
                 <h1 class="display-5 fw-bold mb-3">{{ course.title }}</h1>
@@ -74,16 +75,16 @@
         <div class="col-lg-4">
             <div class="card course-card-fixed">
                 <div class="position-relative">
-                    <img src="{{ course.thumbnail.url|default:'https://via.placeholder.com/400x250?text=TchadSkills' }}" class="card-img-top" alt="{{ course.title }}">
+                    <img src="{% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'img/course-placeholder.svg' %}{% endif %}" class="card-img-top" alt="{{ course.title }}">
                     {% if course.preview_video_url %}
-                    <div class="position-absolute top-50 left-50 translate-middle">
+                    <div class="position-absolute top-50 start-50 translate-middle">
                         <a href="{{ course.preview_video_url }}" class="btn btn-light rounded-circle p-3 shadow-lg"><i class="fas fa-play fa-lg"></i></a>
                     </div>
                     {% endif %}
                 </div>
                 <div class="card-body p-4">
                     <div class="mb-4">
-                        <span class="display-5 fw-bold">{% if course.price > 0 %}{{ course.price }} FCFA{% else %}Gratuit{% endif %}</span>
+                        <span class="display-5 fw-bold">{% if course.price > 0 %}{{ course.price|floatformat:0 }} FCFA{% else %}Gratuit{% endif %}</span>
                     </div>
                     
                     {% if is_enrolled %}

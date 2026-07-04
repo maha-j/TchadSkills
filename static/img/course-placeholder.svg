@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0066CC"/>
+      <stop offset="1" stop-color="#004C99"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="225" fill="url(#g)"/>
+  <g fill="#FFFFFF" opacity="0.9">
+    <path d="M200 70l-60 25 60 25 60-25z"/>
+    <path d="M160 108v25c0 8 18 15 40 15s40-7 40-15v-25l-40 17z"/>
+  </g>
+  <text x="200" y="185" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="700" fill="#FFFFFF" text-anchor="middle">TchadSkills</text>
+</svg>

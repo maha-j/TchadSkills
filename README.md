@@ -20,18 +20,23 @@ Pour lancer le site sur votre ordinateur (Ubuntu/WSL) :
 
 2. **Lancer le serveur** :
    ```bash
-   source venv/bin/activate
    python3 manage.py runserver
    ```
 
 3. **Accéder au site** :
    👉 [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-## 🔐 Accès Démo (Mode Administrateur)
-Pour gérer la plateforme :
-- **URL** : [http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin)
-- **Identifiant** : `admin`
-- **Mot de passe** : `admin123`
+## 🔐 Accès Démo
+Comptes créés par `seed_data.py` :
+- **Administrateur** : `admin` / `admin123` — [http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin)
+- **Instructeur** : `mahadi` / `instructor123`
+
+⚠️ Changez ces mots de passe avant toute mise en production.
+
+## ✅ Tests
+```bash
+python3 manage.py test
+```
 
 ## 🚀 Déploiement Cloud
 Le projet est prêt pour un déploiement sur **Render** ou **Railway** grâce au `Dockerfile` et au fichier `render.yaml` inclus.

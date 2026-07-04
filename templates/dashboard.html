@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Mon Tableau de Bord | TchadSkills{% endblock %}
 
@@ -46,17 +47,19 @@
                 {% for enrollment in enrollments %}
                 <div class="col-md-6 col-xl-4">
                     <div class="course-progress-card card">
-                        <img src="{{ enrollment.course.thumbnail.url|default:'https://via.placeholder.com/400x250?text=TchadSkills' }}" class="card-img-top" alt="{{ enrollment.course.title }}">
+                        <img src="{% if enrollment.course.thumbnail %}{{ enrollment.course.thumbnail.url }}{% else %}{% static 'img/course-placeholder.svg' %}{% endif %}" class="card-img-top" alt="{{ enrollment.course.title }}">
                         <div class="card-body p-4">
                             <h5 class="fw-bold mb-2">{{ enrollment.course.title }}</h5>
                             <p class="text-muted small mb-3">Par {{ enrollment.course.instructor.get_full_name }}</p>
-                            
+
                             <div class="progress-bar-container">
-                                <div class="progress-bar-fill" style="width: 35%"></div> <!-- Exemple statique pour le moment -->
+                                <div class="progress-bar-fill" style="width: {{ enrollment.progress_percent }}%"></div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted small">35% complété</span>
-                                <a href="{% url 'course_viewer' enrollment.course.slug %}" class="btn btn-sm btn-primary">Continuer</a>
+                                <span class="text-muted small">{{ enrollment.progress_percent }}% complété</span>
+                                <a href="{% url 'course_viewer' enrollment.course.slug %}" class="btn btn-sm btn-primary">
+                                    {% if enrollment.is_completed %}Revoir{% else %}Continuer{% endif %}
+                                </a>
                             </div>
                         </div>
                     </div>
